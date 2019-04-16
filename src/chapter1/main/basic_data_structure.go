@@ -67,6 +67,7 @@ func partSlice() {
 }
 
 func iterateSlice() {
+
 	slice := []int{1, 2, 3, 4, 5, 6, 7}
 	fmt.Println("The capacity of the slice is : ", cap(slice))
 
@@ -159,4 +160,21 @@ func mapLearnings() {
 	colors3["Black"] = []string{"new", "ballo"}
 
 	fmt.Printf("After addtion, the color3 map is:%v\n", colors3)
+
+	intMap := map[int]int{1: 100, 2: 200}
+
+	fmt.Printf("Before modify, the int map is:%v\n", intMap)
+
+	modifyMap(intMap)
+
+	fmt.Printf("After modify, the int map is:%v\n", intMap)
+}
+
+/**
+ * 测试映射在函数之间传递的时候，如何传参的。
+ * 比如，固定数组是会拷贝整个数组，而切片只会传递切片本身，类似传递对象一样。
+ * 传递切片的时候，会复制切片的内存，但是切片本身内部的底层数组并不会被复制
+ */
+func modifyMap(m map[int]int) {
+	delete(m, 1)
 }
