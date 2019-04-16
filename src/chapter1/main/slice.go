@@ -11,8 +11,11 @@ func main() {
 
 	//partSlice();
 
-	iterateSlice()
+	//iterateSlice()
 
+	//multipleSlice()
+
+	mapLearnings()
 }
 
 func appendSlice() {
@@ -84,6 +87,21 @@ func iterateSlice() {
 }
 
 /**
+ * 测试多维数组
+ */
+func multipleSlice() {
+	//多维数组
+	arr := [][]int{{1002, 3912, 301092}, {2, 3, 4}}
+
+	for _, firstDimension := range arr {
+		for _, secondDimension := range firstDimension {
+			fmt.Printf(" %d", secondDimension)
+		}
+		fmt.Println()
+	}
+}
+
+/**
  * 注意这里的s的类型，是一个不确定长度的int数组，在之前的代码中，如果传递的参数是定长数组，
  * 那么函数的参数列表声明的必须也是定长数组，只有这种slice 切片可以用不定长数组作为参数
  */
@@ -92,4 +110,53 @@ func printSlice(s []int) {
 		fmt.Print(" ", s[i])
 	}
 	fmt.Println()
+}
+
+func mapLearnings() {
+	//普通的颜色映射 key => value
+	colors := map[string]string{}
+
+	//声明之后赋值。也是 map 中新增元素的方式
+	colors["red"] = "apple"
+	colors["yellow"] = "apple"
+	colors["blue"] = "strawberry"
+
+	colors2 := map[string]string{
+		"Red":    "Apple",
+		"Yellow": "Banana",
+	}
+
+	fmt.Printf("%v", colors2)
+
+	for key, value := range colors {
+		fmt.Printf("Key:%s\tValue:%s\n", key, value)
+	}
+	fmt.Println()
+
+	colors3 := map[string][]string{"Red": {"Apple", "Strawberry"}}
+	fmt.Printf("%v\n", colors3)
+
+	//从 map 取出来的时候，可以多一个变量来判断这个 key 是否存在
+	value, exists := colors3["Red"]
+
+	if exists {
+		fmt.Printf("Red key exists in the color3 map:%v, and value is:%v\n", colors3, value)
+	}
+
+	//如果 key 不在 map 中存在，那么返回值是一个空值,整个 map 的 value 是啥类型，返回的就是啥类型
+	value, exists = colors3["Black"]
+
+	if !exists {
+		fmt.Printf("Key:%s not exists in color3 map:%v, and return value is:%v\n", "Black", colors3, value)
+	}
+
+	//删除 map 的一个 key
+	delete(colors3, "Red")
+
+	fmt.Printf("After deletetion, the color3 map is:%v\n", colors3)
+
+	//直接复制一个字符串切片
+	colors3["Black"] = []string{"new", "ballo"}
+
+	fmt.Printf("After addtion, the color3 map is:%v\n", colors3)
 }
