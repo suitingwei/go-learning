@@ -7,7 +7,7 @@ import (
 
 func main() {
 
-	arr := []int{-4, -1, 0, 3, 10}
+	arr := []int{-4, -1, 0, 3, 10, 2}
 
 	result := []int{}
 	for _, value := range arr {
@@ -15,7 +15,10 @@ func main() {
 	}
 	fmt.Printf("%v\n", result)
 
-	sort.Sort(sort.IntSlice(arr))
+	//直接排序数组
+	sort.Ints(arr)
+
+	//sort.Sort(sort.IntSlice(arr))
 
 	fmt.Printf("%v\n", arr)
 
