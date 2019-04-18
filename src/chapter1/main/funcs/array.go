@@ -1,12 +1,11 @@
-package main
+package funcs
 
 import (
 	"fmt"
-	"math"
 	"sort"
 )
 
-func main() {
+func learnArray() {
 	arr := []int{1, 3, 5, 6}
 
 	result := searchInsert(arr, 5)
@@ -43,7 +42,4 @@ func searchInsert(nums []int, target int) int {
 		}
 	}
 	return len(nums)
-}
-
-func maxiumSubquence(nums []int) int {
 }
