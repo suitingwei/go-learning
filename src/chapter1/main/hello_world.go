@@ -1,7 +1,7 @@
 package main
 
 import "fmt"
-import "./structs"
+import "./goroutine"
 
 func init() {
 	fmt.Println("The init function has been triggered.")
@@ -9,13 +9,33 @@ func init() {
 
 func main() {
 
-	//调用了内部其他包的方法、结构体。注意这里只有首字母大写的才是public 的，而且和 private 的方法还是不一样的
-	//可以同时有 public 和 private 两个名字一样的方法
-	father := structs.User{"John", "John@email.com"}
+	////调用了内部其他包的方法、结构体。注意这里只有首字母大写的才是public 的，而且和 private 的方法还是不一样的
+	////可以同时有 public 和 private 两个名字一样的方法
+	//father := structs.User{"John", "John@email.com"}
+	//
+	//structs.LearnNestingStruct()
+	//
+	//father.Notify()
 
-	structs.LearnNestingStruct()
+	//father2:=structs.PublicFather{
+	//	Age:10,
+	//}
+	//father2.user.Name = "hello"
+	//father2.user.Email ="anosiendo"
+	//
+	//fmt.Printf("%v\n",father2)
 
-	father.Notify()
+	//goroutine.LearnGoRoutine()
+
+	//普通的长时间的 routine，会出现输出是交叉的
+	//goroutine.LearnLongRoutines()
+
+	//使用锁来解决并发
+	//goroutine.LearnRareRoutinesWithLock()
+
+	//使用临界区来解决并发
+	goroutine.LearnRareRoutinesWithMutex()
+
 }
 
 func printArray(arr *[5]int) {
