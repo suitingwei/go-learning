@@ -1,7 +1,7 @@
 package main
 
 import "fmt"
-import "./goroutine"
+import "./goroutine/channel"
 
 func init() {
 	fmt.Println("The init function has been triggered.")
@@ -34,8 +34,11 @@ func main() {
 	//goroutine.LearnRareRoutinesWithLock()
 
 	//使用临界区来解决并发
-	goroutine.LearnRareRoutinesWithMutex()
+	//goroutine.LearnRareRoutinesWithMutex()
 
+	//使用通道传递数据
+	//channel.LearnRoutineWithChannel()
+	channel.LearnChannelWithRaceGame()
 }
 
 func printArray(arr *[5]int) {
