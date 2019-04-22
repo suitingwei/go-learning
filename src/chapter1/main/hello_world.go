@@ -2,7 +2,7 @@ package main
 
 import (
 	"./database"
-	"./log"
+	"./funcs"
 	"fmt"
 )
 
@@ -46,7 +46,12 @@ func main() {
 	//学习数据库操作
 	database.LearnDatabase()
 
-	log.LearnLog()
+	//log.LearnLog()
+
+	//funcs.LearnTimer()
+
+	funcs.LearnTicker()
+
 }
 
 func printArray(arr *[5]int) {
