@@ -1,7 +1,10 @@
 package main
 
-import "fmt"
-import "./goroutine/channel"
+import (
+	"./database"
+	"./log"
+	"fmt"
+)
 
 func init() {
 	fmt.Println("The init function has been triggered.")
@@ -38,7 +41,12 @@ func main() {
 
 	//使用通道传递数据
 	//channel.LearnRoutineWithChannel()
-	channel.LearnChannelWithRaceGame()
+	//channel.LearnChannelWithRaceGame()
+
+	//学习数据库操作
+	database.LearnDatabase()
+
+	log.LearnLog()
 }
 
 func printArray(arr *[5]int) {
