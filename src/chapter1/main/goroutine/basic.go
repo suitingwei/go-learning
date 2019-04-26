@@ -53,3 +53,15 @@ func LearnGoRoutine() {
 
 	fmt.Println("\nTerminating program!")
 }
+
+func LearnRoutine() {
+	fmt.Println("Start go routine")
+
+	go func() {
+		fmt.Println("Code in the go routine")
+	}()
+
+	//如果这里不 sleep，那么整个go 的 master 进程会结束，所有的协程都会被回收
+	//time.Sleep(time.Second * 10)
+	fmt.Println("Go routine ended")
+}

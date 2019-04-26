@@ -1,8 +1,7 @@
 package main
 
 import (
-	"./database"
-	"./funcs"
+	"./goroutine"
 	"fmt"
 )
 
@@ -29,6 +28,7 @@ func main() {
 	//fmt.Printf("%v\n",father2)
 
 	//goroutine.LearnGoRoutine()
+	goroutine.LearnRoutine()
 
 	//普通的长时间的 routine，会出现输出是交叉的
 	//goroutine.LearnLongRoutines()
@@ -44,13 +44,13 @@ func main() {
 	//channel.LearnChannelWithRaceGame()
 
 	//学习数据库操作
-	database.LearnDatabase()
+	//database.LearnDatabase()
 
 	//log.LearnLog()
 
 	//funcs.LearnTimer()
 
-	funcs.LearnTicker()
+	//funcs.LearnTicker()
 
 }
 
