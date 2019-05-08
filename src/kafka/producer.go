@@ -11,6 +11,7 @@ import (
 func main() {
 	config := sarama.NewConfig()
 	config.Producer.RequiredAcks = sarama.NoResponse
+	config.Producer.Return.Successes = true
 
 	producer, err := sarama.NewSyncProducer([]string{"localhost:9092"}, config)
 
@@ -55,7 +56,7 @@ func produceMessages() []*sarama.ProducerMessage {
 	for i := 0; i < 10; i++ {
 		//要发送的消息
 		msg := &sarama.ProducerMessage{
-			Topic: "test", Value: sarama.StringEncoder("test message " + strconv.Itoa(i)),
+			Topic: "test", Value: sarama.StringEncoder("test message:" + strconv.Itoa(i)), Key: sarama.StringEncoder(i),
 		}
 		messages = append(messages, msg)
 	}
