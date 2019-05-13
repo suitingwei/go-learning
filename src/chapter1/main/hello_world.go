@@ -1,7 +1,7 @@
 package main
 
 import (
-	"./goroutine"
+	"./http"
 	"fmt"
 )
 
@@ -28,7 +28,7 @@ func main() {
 	//fmt.Printf("%v\n",father2)
 
 	//goroutine.LearnGoRoutine()
-	goroutine.LearnRoutine()
+	//goroutine.LearnRoutine()
 
 	//普通的长时间的 routine，会出现输出是交叉的
 	//goroutine.LearnLongRoutines()
@@ -52,6 +52,16 @@ func main() {
 
 	//funcs.LearnTicker()
 
+	//simpleEcho:= func(str string){
+	//	fmt.Println("Simply echo the word:"+str)
+	//}
+	//newEcho := structs.FuncWrapper(simpleEcho)
+	//
+	//newEcho("I am the king of the night!")
+
+	//_defer.LearnBasic()
+
+	http.Run()
 }
 
 func printArray(arr *[5]int) {
