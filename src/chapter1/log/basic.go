@@ -6,11 +6,11 @@ import (
 	"os"
 )
 
-func init(){
+func init() {
 	//通过打开文件来指定log 文件
-	file, err :=os.OpenFile("./log.file",os.O_CREATE|os.O_APPEND|os.O_WRONLY,0755)
+	file, err := os.OpenFile("./log.file", os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0755)
 
-	if err !=nil {
+	if err != nil {
 		fmt.Println("Error occurred to create log file!")
 		os.Exit(1)
 	}
@@ -25,14 +25,13 @@ func init(){
 	//这样最终的结果就是位运算的或操作符。
 	log.SetFlags(log.Ldate | log.Llongfile | log.Ltime)
 }
-func LearnLog(){
+func LearnLog() {
 
 	//Log包的函数是支持多进程写的，他会通过临界区加锁
 	log.Println("message 1")
 
 	//这个方法会调os.Exit(1)
 	log.Fatalln("Fatal message 1!")
-
 
 	//这个方法会调用panic()
 	//log.Panicln("Panic message 1!")

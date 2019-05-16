@@ -107,7 +107,6 @@ func charFre(str string) Frequency {
 }
 
 func canThreePartsEqualSum(nums []int) bool {
-
 	totalSum := sumArray(nums)
 
 	for i := 1; i < len(nums)-1; i++ {

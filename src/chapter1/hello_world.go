@@ -1,7 +1,7 @@
 package main
 
 import (
-	"./http"
+	"./reflection"
 	"fmt"
 )
 
@@ -61,7 +61,11 @@ func main() {
 
 	//_defer.LearnBasic()
 
-	http.Run()
+	//http.Run()
+
+	//sync.LearnSync()
+
+	reflection.LearnReflection()
 }
 
 func printArray(arr *[5]int) {
