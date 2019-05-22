@@ -27,4 +27,5 @@ type DiDiRecruitRequestParams struct {
 
 func (requestParams *DiDiRecruitRequestParams) Format() string {
 
+	return ""
 }

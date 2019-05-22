@@ -1,52 +1,82 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
-	"io/ioutil"
-	"my-go-learnings"
+	"log"
+	"my-go-learnings/chapter2/http/models"
 	"net/http"
-	"net/url"
-	"reflect"
 )
 
 const BASE_DIDI_RECRUIT_URL = "http://talent.didiglobal.com/recruit-portal-service/api/job/front/list"
 
+const (
+	BaseInfo      string = "https://api.github.com/users/suitingwei"
+	SearchUserApi string = "https://api.github.com/search/users"
+)
+
+type GithubUserInfo struct {
+	Login string `json:"login"`
+	Id    int    `json:"id"`
+}
+
+type GithubUserList struct {
+	Users            []GithubUserInfo `json:"items"`
+	TotalCount       int              `json:"total_count"`
+	InCompleteResult bool             `json:"incomplete_results"`
+}
+
 func main() {
+	client := &http.Client{} //创建一个请求
 
-	url := buildUrl(&my_go_learnings.DiDiRecruitRequestParams{
-		JobType:     1,
-		Page:        1,
-		WorkArea:    "北京",
-		Size:        10,
-		RecruitType: 1,
-	})
-	//如果参数中有中文参数,这个方法会进行URLEncode
-	Url.RawQuery = params.Encode()
-	urlPath := Url.String()
-	resp, err := http.Get(urlPath)
-	defer resp.Body.Close()
-	s, err := ioutil.ReadAll(resp.Body)
-	fmt.Println(string(s))
+	req, err := http.NewRequest(http.MethodGet, SearchUserApi, nil)
 
-}
-
-func buildUrl(didiParams *my_go_learnings.DiDiRecruitRequestParams) string {
-	params := url.Values{}
-
-	Url, err := url.Parse("http://baidu.com?fd=fdsf")
 	if err != nil {
-		panic(err.Error())
+		log.Fatalln(err)
 	}
 
+	//创建这个请求的 query
+	query := req.URL.Query()
+	query.Add("q", "suitin")
+	query.Add("sort", "joined")
+
+	req.URL.RawQuery = query.Encode()
+
+	fmt.Println(req.URL.String())
+
+	resp, err := client.Do(req)
+
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	defer resp.Body.Close()
+
+	var users GithubUserList
+	err = json.NewDecoder(resp.Body).Decode(&users)
+
+	if err != nil {
+		log.Fatalln(err)
+	}
+	fmt.Println(users)
 }
 
-func setHeaders(request *http.Request, bang *my_go_learnings.GeekBang) {
-	ref := reflect.ValueOf(bang).Elem()
+func learnBasicHttpGet() {
+	resp, err := http.Get(BaseInfo)
 
-	for i := 0; i < ref.NumField(); i++ {
-		valueField := ref.Field(i)
-		typeField := ref.Type().Field(i)
-		//fmt.Println(typeField.Name,valueField.Interface())
-		request.Header.Add(typeField.Name, valueField.String())
+	if err != nil {
+		log.Fatalln(err)
 	}
+
+	defer resp.Body.Close()
+
+	var userInfo GithubUserInfo
+
+	err = json.NewDecoder(resp.Body).Decode(&userInfo)
+
+	fmt.Println(userInfo)
+}
+
+func buildUrl(didiParams *models.DiDiRecruitRequestParams) string {
+	return ""
 }
