@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"math"
 	"net/http"
 	"sync"
 )
@@ -11,45 +12,32 @@ import (
 const BASE_DIDI_RECRUIT_URL = "http://talent.didiglobal.com/recruit-portal-service/api/job/front/list"
 
 const (
-	BaseInfo      string = "https://api.github.com/users/suitingwei"
-	SearchUserApi string = "https://api.github.com/search/users"
+	BaseInfo string = "https://api.github.com/users/suitingwei"
+	//添加用户、密码，防止 github 限流
+	SearchUserApi string = "https://suitingwei:suitingwei123@api.github.com/search/users"
 )
 
 func main() {
-	client := &http.Client{} //创建一个请求
 
-	req, err := http.NewRequest(http.MethodGet, SearchUserApi, nil)
-
-	if err != nil {
-		log.Fatalln(err)
-	}
-
-	//创建这个请求的 query
-	query := req.URL.Query()
-	query.Add("q", "suitin")
-	query.Add("sort", "joined")
-
-	req.URL.RawQuery = query.Encode()
-
-	fmt.Printf("Github api url:%s\n", req.URL.String())
-
-	resp, err := client.Do(req)
-
-	if err != nil {
-		log.Fatalln(err)
-	}
-
-	defer resp.Body.Close()
-
-	var users GithubUserList
-	err = json.NewDecoder(resp.Body).Decode(&users)
-
-	if err != nil {
-		log.Fatalln(err)
-	}
-
+	searchName := "suit"
 	downloader := New()
-	downloader.download1(&users)
+
+	page := 1
+	//init the users container
+	users := downloader.SearchUsers(searchName, page)
+
+	//总分页数量
+	totalPages := int(math.Ceil(float64(users.TotalCount) / float64(users.CurrentUsersCount())))
+
+	for page = 2; page <= totalPages; page++ {
+		fmt.Printf("Current user count is:%d, total user count:%d,totalPages:%d\n", users.CurrentUsersCount(), users.TotalCount, totalPages)
+
+		newUsers := downloader.SearchUsers(searchName, page)
+
+		users.AppendUsers(newUsers)
+	}
+
+	downloader.Download(users)
 }
 
 func learnBasicHttpGet() {
