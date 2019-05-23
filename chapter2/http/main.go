@@ -19,25 +19,22 @@ const (
 
 func main() {
 
-	searchName := "suit"
 	downloader := New()
 
-	page := 1
-	//init the users container
-	users := downloader.SearchUsers(searchName, page)
+	//Set the search name of the github api
+	downloader.searchName = "sui"
 
-	//总分页数量
-	totalPages := int(math.Ceil(float64(users.TotalCount) / float64(users.CurrentUsersCount())))
+	//init the users container
+	users := downloader.SearchUsers()
 
 	for page = 2; page <= totalPages; page++ {
 		fmt.Printf("Current user count is:%d, total user count:%d,totalPages:%d\n", users.CurrentUsersCount(), users.TotalCount, totalPages)
 
-		newUsers := downloader.SearchUsers(searchName, page)
+		newUsers := downloader.SearchUsers()
 
-		users.AppendUsers(newUsers)
+		downloader.DownloadThroughChannel(newUsers)
 	}
 
-	downloader.Download(users)
 }
 
 func learnBasicHttpGet() {

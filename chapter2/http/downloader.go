@@ -10,8 +10,19 @@ import (
 	"path/filepath"
 	"strconv"
 	"sync"
+	"sync/atomic"
 	"time"
 )
+
+type Downloader struct {
+	searchName      string              // the search name of the github api
+	currentPage     int                 // the current request page
+	mainChannel     chan GithubUserInfo // main channel receive from the main routine
+	downloadedCount int64               // the total downloaded avatars
+	wg              sync.WaitGroup      // the sync group
+	totalCount      int                 // the total avatars to be downloaded
+	PageSize        int                 // the page size of the github search user api
+}
 
 type GithubUserInfo struct {
 	Login  string `json:"login"`
@@ -39,17 +50,32 @@ func (users *GithubUserList) AppendUsers(newUsers *GithubUserList) {
 	}
 }
 
-type Downloader struct {
-}
-
 func New() *Downloader {
-	return &Downloader{}
+	downloader := &Downloader{
+		mainChannel:     make(chan GithubUserInfo),
+		downloadedCount: 1,
+		wg:              sync.WaitGroup{},
+	}
+
+	go func() {
+		logFile, _ := os.Create("./mainRoutine.log")
+		log.SetOutput(logFile)
+		log.SetFlags(log.LstdFlags | log.Ltime)
+
+		for {
+			log.Println("waiting for the main channel's data coming....")
+			user := <-downloader.mainChannel
+			go downloader.DownloadUrl(user)
+		}
+	}()
+
+	return downloader
 }
 
 //download method will download all the users' avatars in the given users slice.
 //Be noticed about that the github api will return all user's count, be each page
 //only return part of the users.
-func (downloader Downloader) Download(users *GithubUserList) {
+func (downloader *Downloader) Download(users *GithubUserList) {
 	//计算耗时
 	startTime := time.Now()
 	fmt.Printf("Start download %d avatars!\n", users.TotalCount)
@@ -59,8 +85,7 @@ func (downloader Downloader) Download(users *GithubUserList) {
 	wg.Add(users.TotalCount)
 
 	for _, user := range users.Users {
-		fmt.Println(user.Login, user.Avatar)
-		go DownloadUrl(user, &wg)
+		go downloader.DownloadUrl(user)
 	}
 	wg.Wait()
 
@@ -70,7 +95,7 @@ func (downloader Downloader) Download(users *GithubUserList) {
 }
 
 //Request method will request the github api to search users.
-func (downloader Downloader) SearchUsers(name string, page int) *GithubUserList {
+func (downloader *Downloader) SearchUsers() *GithubUserList {
 	client := &http.Client{} //创建一个请求
 
 	req, err := http.NewRequest(http.MethodGet, SearchUserApi, nil)
@@ -81,8 +106,8 @@ func (downloader Downloader) SearchUsers(name string, page int) *GithubUserList 
 
 	//创建这个请求的 query
 	query := req.URL.Query()
-	query.Add("q", name)
-	query.Add("page", strconv.Itoa(page))
+	query.Add("q", downloader.searchName)
+	query.Add("page", strconv.Itoa(downloader.currentPage))
 	query.Add("sort", "joined")
 
 	req.URL.RawQuery = query.Encode()
@@ -104,12 +129,33 @@ func (downloader Downloader) SearchUsers(name string, page int) *GithubUserList 
 		log.Fatalln(err)
 	}
 
+	//This page's request is successfully, go to the next page
+	downloader.currentPage++
+
+	if downloader.PageSize != 0 {
+		//update the downloader's total count attr.
+		downloader.PageSize = users.CurrentUsersCount()
+
+		//set the total count of the search users.
+		downloader.totalCount = users.TotalCount
+
+		//Add the wg
+		downloader.wg.Add(users.TotalCount)
+	}
+
 	return &users
 }
 
+//Download through will pass the new user into the downloader's main channel
+func (downloader *Downloader) DownloadThroughChannel(newUsers *GithubUserList) {
+	for _, newUser := range newUsers.Users {
+		downloader.mainChannel <- newUser
+	}
+}
+
 //DownloadAvatar method will download the users' avatars through goroutines.
-func DownloadUrl(user GithubUserInfo, wg *sync.WaitGroup) {
-	defer wg.Done()
+func (downloader *Downloader) DownloadUrl(user GithubUserInfo) {
+	defer downloader.wg.Done()
 	imagePath, err := filepath.Abs("./")
 	if err != nil {
 		log.Fatalf("Failed to obtain the image path:%s\n", err.Error())
@@ -124,13 +170,14 @@ func DownloadUrl(user GithubUserInfo, wg *sync.WaitGroup) {
 	file, err := os.Create(filepath.Join(imagePath, user.Login+".jpg"))
 
 	if err != nil {
-		log.Fatalln(err)
+		log.Println(err)
+		return
 	}
-	fmt.Println("Start to downloading...")
 	resp, err := http.Get(user.Avatar)
 
 	if err != nil {
-		log.Fatalln(err)
+		log.Println(err)
+		return
 	}
 
 	defer resp.Body.Close()
@@ -138,8 +185,12 @@ func DownloadUrl(user GithubUserInfo, wg *sync.WaitGroup) {
 	_, err = io.Copy(file, resp.Body)
 
 	if err != nil {
-		log.Fatalln(err)
+		log.Println(err)
+		return
 	}
 
-	fmt.Printf("User:%s's avatar:[%s] has been downloaded successfully!\n", user.Login, user.Avatar)
+	//atomic.AddInt64(downloadedCount,1)
+	atomic.AddInt64(&downloader.downloadedCount, 1)
+
+	fmt.Printf("[%d/%d]\t[%s] has been downloaded successfully!\n", atomic.LoadInt64(&downloader.downloadedCount), downloader.totalCount, user.Avatar)
 }
