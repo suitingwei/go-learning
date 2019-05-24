@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"math"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -16,12 +17,13 @@ import (
 
 type Downloader struct {
 	searchName      string              // the search name of the github api
-	currentPage     int                 // the current request page
+	CurrentPage     int                 // the current request page
 	mainChannel     chan GithubUserInfo // main channel receive from the main routine
 	downloadedCount int64               // the total downloaded avatars
 	wg              sync.WaitGroup      // the sync group
 	totalCount      int                 // the total avatars to be downloaded
 	PageSize        int                 // the page size of the github search user api
+	TotalPages      int
 }
 
 type GithubUserInfo struct {
@@ -55,6 +57,7 @@ func New() *Downloader {
 		mainChannel:     make(chan GithubUserInfo),
 		downloadedCount: 1,
 		wg:              sync.WaitGroup{},
+		CurrentPage:     1,
 	}
 
 	go func() {
@@ -107,7 +110,7 @@ func (downloader *Downloader) SearchUsers() *GithubUserList {
 	//创建这个请求的 query
 	query := req.URL.Query()
 	query.Add("q", downloader.searchName)
-	query.Add("page", strconv.Itoa(downloader.currentPage))
+	query.Add("page", strconv.Itoa(downloader.CurrentPage))
 	query.Add("sort", "joined")
 
 	req.URL.RawQuery = query.Encode()
@@ -130,14 +133,16 @@ func (downloader *Downloader) SearchUsers() *GithubUserList {
 	}
 
 	//This page's request is successfully, go to the next page
-	downloader.currentPage++
+	downloader.CurrentPage++
 
-	if downloader.PageSize != 0 {
+	if downloader.PageSize == 0 {
 		//update the downloader's total count attr.
 		downloader.PageSize = users.CurrentUsersCount()
 
 		//set the total count of the search users.
 		downloader.totalCount = users.TotalCount
+
+		downloader.TotalPages = int(math.Ceil(float64(users.TotalCount) / float64(users.CurrentUsersCount())))
 
 		//Add the wg
 		downloader.wg.Add(users.TotalCount)
@@ -155,7 +160,6 @@ func (downloader *Downloader) DownloadThroughChannel(newUsers *GithubUserList) {
 
 //DownloadAvatar method will download the users' avatars through goroutines.
 func (downloader *Downloader) DownloadUrl(user GithubUserInfo) {
-	defer downloader.wg.Done()
 	imagePath, err := filepath.Abs("./")
 	if err != nil {
 		log.Fatalf("Failed to obtain the image path:%s\n", err.Error())

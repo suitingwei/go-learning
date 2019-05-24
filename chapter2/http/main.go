@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	"math"
 	"net/http"
 	"sync"
 )
@@ -27,8 +26,8 @@ func main() {
 	//init the users container
 	users := downloader.SearchUsers()
 
-	for page = 2; page <= totalPages; page++ {
-		fmt.Printf("Current user count is:%d, total user count:%d,totalPages:%d\n", users.CurrentUsersCount(), users.TotalCount, totalPages)
+	for ; downloader.CurrentPage < downloader.TotalPages; downloader.CurrentPage++ {
+		fmt.Printf("Current user count is:%d, total user count:%d,totalPages:%d\n", users.CurrentUsersCount(), users.TotalCount, downloader.TotalPages)
 
 		newUsers := downloader.SearchUsers()
 
