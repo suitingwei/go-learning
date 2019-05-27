@@ -1,8 +1,8 @@
-package chapter1
+package main
 
 import (
 	"fmt"
-	"my-go-learnings"
+	"my-go-learnings/chapter1/structs"
 )
 
 func init() {
@@ -65,7 +65,10 @@ func main() {
 
 	//sync.LearnSync()
 
-	my_go_learnings.LearnReflection()
+	//my_go_learnings.LearnReflection()
+	//panic.LearnPanic()
+	//structs.LearnRawString()
+	structs.LearnByteAndRune()
 }
 
 func printArray(arr *[5]int) {

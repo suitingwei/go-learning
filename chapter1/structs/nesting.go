@@ -2,11 +2,10 @@ package structs
 
 import (
 	"fmt"
-	"my-go-learnings"
 )
 
 type father struct {
-	user   my_go_learnings.User
+	user   User
 	belong string
 }
 
@@ -26,11 +25,11 @@ func (f father) earnMoney() {
 func LearnNestingStruct() {
 
 	father := father{
-		user:   my_go_learnings.User{"Jon", "jon@email.com"},
+		user:   User{"Jon", "jon@email.com"},
 		belong: "earth mother",
 	}
 
-	my_go_learnings.sendNotification(father.user)
+	sendNotification(father.user)
 
 	father.user.notify()
 

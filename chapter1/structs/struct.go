@@ -45,12 +45,6 @@ func (u *structUser) realChangeAge(newAge int) {
 	//(*u).age = newAge
 }
 
-func main() {
-	//basicStruct()
-
-	structMethod()
-}
-
 func basicStruct() {
 
 	list := []structUser{

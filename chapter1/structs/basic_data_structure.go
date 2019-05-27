@@ -1,7 +1,9 @@
-package chapter1
+package structs
 
 import (
 	"fmt"
+	"log"
+	"os/exec"
 )
 
 func main() {
@@ -177,4 +179,30 @@ func mapLearnings() {
  */
 func modifyMap(m map[int]int) {
 	delete(m, 1)
+}
+
+func LearnRawString() {
+	rawString := `ls -l | awk '{print $0 }'`
+
+	cmd := exec.Command("/usr/local/bin/bash", "-c", rawString)
+	output, err := cmd.Output()
+
+	if err != nil {
+		log.Fatalln(err)
+	}
+	fmt.Println(string(output))
+
+}
+
+func LearnByteAndRune() {
+	str := "hello 世界，你好，i am suitingwei"
+
+	for i := 0; i < len(str); i++ {
+		fmt.Printf("%c ", str[i])
+	}
+	fmt.Println()
+
+	for _, value := range str {
+		fmt.Printf("%c ", value)
+	}
 }
