@@ -82,7 +82,6 @@ func (downloader *Downloader) Download(users *GithubUserList) {
 	//计算耗时
 	startTime := time.Now()
 	fmt.Printf("Start download %d avatars!\n", users.TotalCount)
-
 	//使用协程并发下载哦
 	wg := sync.WaitGroup{}
 	wg.Add(users.TotalCount)
