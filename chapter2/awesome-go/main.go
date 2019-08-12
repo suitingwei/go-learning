@@ -11,7 +11,7 @@ func main() {
 
 	saver := crawl.NewFileSaver("./crawl-result")
 
-	downloader := crawl.NewDownloader(saver, false)
+	downloader := crawl.NewDownloader(saver, false, 5)
 
 	downloader.Serve(":8888")
 }

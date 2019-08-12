@@ -10,19 +10,10 @@ import (
 )
 
 const (
-	SignalStart     = iota //the signal which used to notify the download-routines to begin downloading
-	SignalStop             //when the download routines receive the stop-signal,it will stop the download process
-	SignalResume           //resume the download process
-	SignalRestart          //restart the whole download process,all the data downloaded will be DELETED
-	SignalTerminate        //terminated the whole download process, the data downloaded will be RETAINED
-
-)
-
-const (
 	StatusInitialized = iota //the main process is not running
 	StatusRunning            //the main process is running
+	StatusResume             //the main process is running
 	StatusStopped
-	StatusFinished
 )
 
 //The downloader is used to download the data from the web page.
@@ -43,6 +34,8 @@ type Downloader struct {
 	ProjectsCount         int      //the total count of the awesome-go projects, should be the length of Downloader.Projects
 	FinishedProjectsCount int      //the total count of the finished projects.
 	Projects              []*AwesomeGoData
+	CrawlersCount         int
+	crawlerChannels       []chan int
 }
 
 //awesome represents a github go project's basic information
@@ -65,18 +58,19 @@ type StatRequestParams struct {
 	Format string `json:"format"` //the format should be one of: simple,detail
 }
 
-func NewDownloader(saver Saver, autoRun bool) *Downloader {
+func NewDownloader(saver Saver, autoRun bool, crawlersCount int) *Downloader {
 	downloader := &Downloader{
-		saver:   saver,
-		channel: make(chan int),
-		AutoRun: autoRun,
-		status:  StatusInitialized,
+		saver:         saver,
+		channel:       make(chan int),
+		AutoRun:       autoRun,
+		status:        StatusInitialized,
+		CrawlersCount: crawlersCount,
 	}
 
 	//Auto run the main loop to download the awesome go project information by go routine
 	//NOTICE, at this moment, the main-entry data may not be ready.
 	if downloader.AutoRun {
-		go downloader.MainLoop()
+		downloader.initCrawlers()
 	}
 
 	return downloader
@@ -88,39 +82,62 @@ func (d *Downloader) Start() {
 	//initialize the data to be crawled  by go routines
 	d.initData()
 
+	//initialize the crawlers
+	d.initCrawlers()
+
+	//Send the start signal to the channel
+	for i := 0; i < d.CrawlersCount; i++ {
+		d.crawlerChannels[i] <- StatusRunning
+	}
+}
+
+func (d *Downloader) initCrawlers() {
 	//The downloader can be run by mainly two ways.
 	//1.Auto run when the downloader created and the autoRun parameter is true
 	//2.After the creation process, the client can call the Start method to activate the main loop.
 	if d.status == StatusInitialized {
-		go d.MainLoop()
-	}
+		//update the downloader status
+		d.status = StatusRunning
 
-	//Send the start signal to the channel
-	d.channel <- SignalStart
+		//declare an array of channels.
+		//NOTICE, after this expression, go will create an array of nil channel
+		d.crawlerChannels = make([]chan int, d.CrawlersCount)
+
+		//MUST use the for-loop to initialize the channel in array
+		for i := 0; i < d.CrawlersCount; i++ {
+			d.crawlerChannels[i] = make(chan int)
+		}
+
+		//initialized the crawlers
+		for i := 0; i < d.CrawlersCount; i++ {
+			go d.mainLoop(i, d.crawlerChannels[i])
+		}
+	}
 }
 
-//MainLoop the crawl process
-func (d *Downloader) MainLoop() {
+//mainLoop the crawl process
+func (d *Downloader) mainLoop(crawlerNum int, controlChannel <-chan int) {
+	status := StatusStopped
+
 	for {
 		select {
-		case signal := <-d.channel:
-			switch signal {
-			case SignalStart:
-				log.Println("[Downloader] Start running process...")
-			case SignalStop:
+		case status = <-controlChannel:
+			switch status {
+			case StatusStopped:
 				log.Println("[Downloader] Stop running process...")
-			case SignalResume:
+				status = StatusStopped
+			case StatusResume:
 				log.Println("[Downloader] Resume running process...")
-			case SignalTerminate:
-				log.Println("[Downloader] Terminate running process...")
-			case SignalRestart:
-				log.Println("[Downloader] Restart running process...")
+				status = StatusRunning
 			}
 		default:
-			if d.status != StatusRunning {
-				d.status = StatusRunning
+			log.Printf("[Crawler:%d] running status:%d\n", crawlerNum, status)
+			time.Sleep(time.Second * 1)
+
+			if status == StatusStopped {
+				break
 			}
-			d.DoCrawl()
+			d.doCrawl()
 		}
 	}
 }
@@ -128,25 +145,18 @@ func (d *Downloader) MainLoop() {
 func (d *Downloader) Stop() {
 	log.Println("[Downloader] Stop")
 
-	d.channel <- SignalStop
+	//Send the start signal to the channel
+	for i := 0; i < d.CrawlersCount; i++ {
+		d.crawlerChannels[i] <- StatusStopped
+	}
 }
 
 func (d *Downloader) Resume() {
 	log.Println("[Downloader] Resume")
 
-	d.channel <- SignalResume
-}
-
-func (d *Downloader) Terminate() {
-	log.Println("[Downloader] Terminate")
-
-	d.channel <- SignalTerminate
-}
-
-func (d *Downloader) Restart() {
-	log.Println("[Downloader] Restart")
-
-	d.channel <- SignalRestart
+	for i := 0; i < d.CrawlersCount; i++ {
+		d.crawlerChannels[i] <- StatusResume
+	}
 }
 
 //Serve the http api to monitor and control the downloader behaviour.
@@ -172,16 +182,12 @@ func (d *Downloader) control(w http.ResponseWriter, r *http.Request) {
 	}
 
 	switch control.Action {
-	case SignalStart:
+	case StatusInitialized, StatusRunning:
 		d.Start()
-	case SignalStop:
+	case StatusStopped:
 		d.Stop()
-	case SignalResume:
+	case StatusResume:
 		d.Resume()
-	case SignalTerminate:
-		d.Terminate()
-	case SignalRestart:
-		d.Restart()
 	}
 
 	_, err = w.Write([]byte("OK"))
@@ -199,10 +205,9 @@ func (d *Downloader) stat(w http.ResponseWriter, r *http.Request) {
 
 //Do the real download process.
 //TODO use to config to set up the concurrency level.
-func (d *Downloader) DoCrawl() {
+func (d *Downloader) doCrawl() {
 	log.Printf("[Do Crawl] running,[%d/%d]", d.FinishedProjectsCount, d.ProjectsCount)
 
-	time.Sleep(time.Second * 1)
 }
 
 //initialize the main entry data of the awesome-go projects from the
