@@ -16,3 +16,20 @@ func BenchmarkTest(b *testing.B) {
 		testStringCopy()
 	}
 }
+
+func TestSlice(t *testing.T) {
+
+	data := [3]int{1, 2, 3}
+
+	t.Log(data)
+
+	modityFunc(data, t)
+
+	t.Log(data)
+
+}
+
+func modityFunc(arr [3]int, t *testing.T) {
+	arr[2] = 20
+	t.Logf("Arr in func=%v,arr addr", arr)
+}
