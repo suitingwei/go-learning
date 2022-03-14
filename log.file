@@ -1,8 +1,0 @@
-LEARN_LOG 2019/04/19 18:17:59 /Users/sui/Code/learnings/go/src/chapter1/main/log/basic.go:29: message 1
-LEARN_LOG 2019/04/19 18:17:59 /Users/sui/Code/learnings/go/src/chapter1/main/log/basic.go:32: Fatal message 1!
-LEARN_LOG 2019/04/19 18:18:09 /Users/sui/Code/learnings/go/src/chapter1/main/log/basic.go:29: message 1
-LEARN_LOG 2019/04/19 18:18:09 /Users/sui/Code/learnings/go/src/chapter1/main/log/basic.go:32: Fatal message 1!
-LEARN_LOG 2019/04/19 18:18:12 /Users/sui/Code/learnings/go/src/chapter1/main/log/basic.go:29: message 1
-LEARN_LOG 2019/04/19 18:18:12 /Users/sui/Code/learnings/go/src/chapter1/main/log/basic.go:32: Fatal message 1!
-LEARN_LOG 2019/04/22 15:13:01 /Users/sui/Code/learnings/go/src/chapter1/main/log/basic.go:31: message 1
-LEARN_LOG 2019/04/22 15:13:01 /Users/sui/Code/learnings/go/src/chapter1/main/log/basic.go:34: Fatal message 1!

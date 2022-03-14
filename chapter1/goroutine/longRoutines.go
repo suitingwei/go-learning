@@ -2,7 +2,6 @@ package goroutine
 
 import (
 	"fmt"
-	"my-go-learnings"
 	"runtime"
 	"sync"
 )
@@ -28,8 +27,6 @@ func LearnLongRoutines() {
 }
 
 func printPrime(prefix string) {
-	defer my_go_learnings.wg.Done()
-
 next:
 	for outer := 2; outer < 5000; outer++ {
 		for inner := 2; inner < outer; inner++ {
