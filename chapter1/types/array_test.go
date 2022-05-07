@@ -1,6 +1,7 @@
 package types
 
 import (
+	"fmt"
 	"math/rand"
 	"testing"
 )
@@ -47,4 +48,29 @@ func columnCopy(src, dest [matrixLength][matrixLength]int) {
 			dest[i][j] = src[i][j]
 		}
 	}
+}
+
+type User struct {
+	Name string
+	Age  int
+}
+
+type UserList []User
+
+func TestAbc(t *testing.T) {
+	user1 := User{Name: "jon"}
+	user2 := User{Name: "alice"}
+	user3 := User{Name: "bob"}
+
+	users := []User{
+		user1, user2, user3,
+	}
+
+	userList := UserList{}
+
+	if userList == nil {
+		fmt.Println("user list is nil")
+	}
+
+	fmt.Println("users", userList, users)
 }
