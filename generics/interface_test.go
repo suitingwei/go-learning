@@ -71,4 +71,7 @@ func TestInterface(t *testing.T) {
 	filePlusser := &CommaPlusser{}
 	files := []File{zipFile, mp3File, picFile}
 	t.Logf("泛型[逗号加法器,文件]=%s\t", stringPlus[File, plusser](filePlusser, files))
+
+	//可以不传递泛型函数的构造初始化type parameters,编译器会进行类型推断
+	t.Logf("泛型推断[逗号加法器,人群]=%s\t", stringPlus(normalPlusser, people))
 }
