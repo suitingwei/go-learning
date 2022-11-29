@@ -35,7 +35,7 @@ var user1 = User{
 func TestTempOmit(t *testing.T) {
 	data, _ := json.Marshal(struct {
 		*User
-		Password bool `json:"password,omitempty"`
+		Password string `json:"password,omitempty"`
 	}{
 		User: &user1,
 	})
